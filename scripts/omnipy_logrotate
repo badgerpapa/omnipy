@@ -1,0 +1,6 @@
+/home/pi/omnipy/data/omnipy.log {
+  daily
+  rotate 5
+  compress
+  delaycompress
+}

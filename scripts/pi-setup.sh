@@ -158,7 +158,9 @@ sudo systemctl enable omnipy.service
 sudo systemctl enable omnipy-beacon.service
 sudo systemctl start omnipy.service
 sudo systemctl start omnipy-beacon.service
-
+echo Setting up Log Rotation
+sudo cp /home/pi/omnipy/scripts/omnipy_logrotate /etc/logrotate.d/omnipy
+sudo chown root:root /etc/logrotate.d/omnipy
 echo
 echo ${bold}Setup completed.${normal}
 
