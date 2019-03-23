@@ -1,17 +1,44 @@
 #!/bin/bash
 
+
+OMNIPY_HOME="/home/pi/omnipy"
+
 function UpdateOmnipy(){
-	cd ~
+	cd $OMNIPY_HOME/../
 	backupfilename="omnipy_backup_"$(date +%d-%m-%y-%H%M%S)".tar.gz omnipy"
 	tar -cvzf $backupfilename
-	cd ~/omnipy
+	cd $OMNIPY_HOME
 	git stash
 	git pull -f
-	bash ~/omnipy/scripts/pi-update.sh
+	bash $OMNIPY_HOME/scripts/pi-update.sh
 }
 
 function NewPODActivation(){
-	echo "fonction a faire"
+		cd $OMNIPY_HOME
+		echo "cd $OMNIPY_HOME"
+		echo "./omni.py readpdm"
+		whiptail --title "Activate new POD" --msgbox "The pi is in waiting state, press Status on your PDM to the radio address." 8 45
+		READPDM=$(./omni.py readpdm)
+		#READPDM=$(cat readpdm.json)
+		echo $READPDM
+		STATUS=$(echo $READPDM | jq .success)
+		echo $STATUS
+		if [ $STATUS != "true" ]; then MainMenu; fi;
+
+		RadioAddress=$(echo $READPDM | jq .response.radio_address)
+		
+		whiptail --title "POD Activation" --msgbox "The radio address is $RadioAddress." 10 60
+
+		LotID=$(whiptail --title "Input" --inputbox "What is the LOT Number ?" 10 60 3>&1 1>&2 2>&3)
+ 		exitstatus=$?
+		if [ $exitstatus -ne 0 ]; then MainMenu; fi;
+
+		SerialID=$(whiptail --title "Input" --inputbox "What is the Serial Number ?" 10 60 3>&1 1>&2 2>&3)
+                exitstatus=$?
+                if [ $exitstatus -ne 0 ]; then MainMenu; fi;
+
+
+		./omni.py newpod $LotID $SerialID $RadioAddress
 
 
 
@@ -22,23 +49,8 @@ function PODDeactivation(){
 	echo "./omni.py deactivate"
 }
 
-while true
-do
-
-OPTION=$(whiptail --title "Omnipy Menu" --menu "Choose the action you want to perform" --cancel-button "Back to shell" 20 50 6 \
-"1" "Developer Menu" \
-"2" "Activate New Pod" \
-"3" "Deactivate Pod" \
-"4" "Update Omnipy" \
-"5" "Safe Reboot" \
-"6" "Safe Shutdown"  3>&1 1>&2 2>&3)
-
-exitstatus=$?
-if [ $exitstatus -ne 0 ]; then exit; fi;
-
-case $OPTION in
-	1)
-		echo "Developer Menu"
+function DeveloperMenu(){
+			echo "Developer Menu"
 		SUBOPTION=$(whiptail --title "Omnipy Developers Menu" --menu "Choose the action you want to perform" --cancel-button "Back" 20 50 9 \
 			"1" "Rig status" \
 			"2" "View POD.log" \
@@ -51,7 +63,7 @@ case $OPTION in
 			"9" "Restore backup"  3>&1 1>&2 2>&3)
 
 		exitstatus=$?
-		if [ $exitstatus -ne 0 ]; then break; fi;
+		if [ $exitstatus -ne 0 ]; then MainMenu; fi;
 
 
 		case $SUBOPTION in
@@ -96,28 +108,32 @@ case $OPTION in
 
 		esac
 
+
+}
+
+function MainMenu(){
+
+while true
+do
+
+OPTION=$(whiptail --title "Omnipy Menu" --menu "Choose the action you want to perform" --cancel-button "Back to shell" 20 50 6 \
+"1" "Developer Menu" \
+"2" "Activate New Pod" \
+"3" "Deactivate Pod" \
+"4" "Update Omnipy" \
+"5" "Safe Reboot" \
+"6" "Safe Shutdown"  3>&1 1>&2 2>&3)
+
+exitstatus=$?
+if [ $exitstatus -ne 0 ]; then exit; fi;
+
+case $OPTION in
+	1)
+		DeveloperMenu
 	;;
 
 	2) #Activate a new pod
-		cd ~
-		echo "cd omnipy"
-		echo "./omni.py readpdm"
-		whiptail --title "Activate new POD" --msgbox "The pi is in waiting state, press Status on your PDM to the radio address." 8 45
-		#how to get the RRRRRRR directly in this scripts ?
-		RadioAdrress="521046514"
-		whiptail --title "POD Activation" --msgbox "The radio address is $RadioAddress." 10 60
-
-		LotID=$(whiptail --title "Input" --inputbox "What is the LOT Number ?" 10 60 3>&1 1>&2 2>&3)
- 		exitstatus=$?
-		if [ $exitstatus -ne 0 ]; then exit; fi;
-
-		SerialID=$(whiptail --title "Input" --inputbox "What is the Serial Number ?" 10 60 3>&1 1>&2 2>&3)
-                exitstatus=$?
-                if [ $exitstatus -ne 0 ]; then exit; fi;
-
-
-		./omni.py newpod $LotID $SerialID $RadioAddress
-
+		NewPODActivation
 	;;
 	
 	3)
@@ -168,3 +184,6 @@ case $OPTION in
 esac
 
 done
+}
+
+MainMenu
