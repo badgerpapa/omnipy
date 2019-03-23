@@ -75,7 +75,7 @@ chmod 755 /home/pi/omnipy/omni.py
 
 echo
 echo ${bold}Step 4/11: ${normal}Installing dependencies
-sudo apt install -y bluez-tools python3 python3-pip git build-essential libglib2.0-dev vim || ((echo "Error: installing dependencies failed - aborting" && exit))
+sudo apt install -y bluez-tools python3 python3-pip git build-essential libglib2.0-dev vim jq || ((echo "Error: installing dependencies failed - aborting" && exit))
 sudo pip3 install simplejson || ((echo "Error: installing dependencies failed - aborting" && exit))
 sudo pip3 install Flask || ((echo "Error: installing dependencies failed - aborting" && exit))
 sudo pip3 install cryptography || ((echo "Error: installing dependencies failed - aborting" && exit))

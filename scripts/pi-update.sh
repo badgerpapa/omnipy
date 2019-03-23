@@ -35,7 +35,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]
 then
 echo Installing dependencies
 cd /home/pi/omnipy
-sudo apt install -y bluez-tools python3 python3-pip git build-essential libglib2.0-dev vim
+sudo apt install -y bluez-tools python3 python3-pip git build-essential libglib2.0-dev vim jq
 sudo pip3 install simplejson
 sudo pip3 install Flask
 sudo pip3 install cryptography
